@@ -9,8 +9,6 @@ const cors = require("cors");
 app.use(cors());
 
 
-
-
 app.get("/api/chat", (req, res) => {
   console.log("request");
   
