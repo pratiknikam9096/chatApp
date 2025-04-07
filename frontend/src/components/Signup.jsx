@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import {
   Box,
   TextField,
@@ -6,13 +7,45 @@ import {
   IconButton,
   InputAdornment,
   Typography,
-  Paper
+  Paper,
+  FormHelperText
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    clearErrors
+  } = useForm();
+
+  const onSubmit = (data) => {
+    console.log('Form Submitted:', data);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('profilePic', {
+          type: 'manual',
+          message: 'Only JPG, JPEG, and PNG files are allowed',
+        });
+        setSelectedFileName('');
+      } else {
+        clearErrors('profilePic');
+        setSelectedFileName(file.name);
+      }
+    }
+  };
 
   return (
     <Box
@@ -27,68 +60,104 @@ function Signup() {
           Signup
         </Typography>
 
-        <TextField
-          fullWidth
-          label="Name"
-          margin="normal"
-        />
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <TextField
+            fullWidth
+            label="Name"
+            margin="normal"
+            {...register('name', { required: 'Name is required' })}
+            error={!!errors.name}
+            helperText={errors.name?.message}
+          />
 
-        <TextField
-          fullWidth
-          label="Email Address"
-          type="email"
-          margin="normal"
-        />
+          <TextField
+            fullWidth
+            label="Email Address"
+            margin="normal"
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Enter a valid email'
+              }
+            })}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
 
-        <TextField
-          fullWidth
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          margin="normal"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+          <TextField
+            fullWidth
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            margin="normal"
+            {...register('password', { required: 'Password is required' })}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
-        <TextField
-          fullWidth
-          label="Confirm Password"
-          type={showConfirm ? 'text' : 'password'}
-          margin="normal"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowConfirm(!showConfirm)} edge="end">
-                  {showConfirm ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+          <TextField
+            fullWidth
+            label="Confirm Password"
+            type={showConfirm ? 'text' : 'password'}
+            margin="normal"
+            {...register('confirmPassword', { required: 'Confirm your password' })}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword?.message}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowConfirm(!showConfirm)} edge="end">
+                    {showConfirm ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
-        <Button
-          variant="outlined"
-          component="label"
-          fullWidth
-          sx={{ mt: 2 }}
-        >
-          Upload Profile Picture
-          <input type="file" hidden accept="image/*" />
-        </Button>
+          <Button
+            variant="outlined"
+            component="label"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            Upload Profile Picture
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              {...register('profilePic')}
+              onChange={handleFileChange}
+            />
+          </Button>
 
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{ mt: 2 }}
-        >
-          Signup
-        </Button>
+          {selectedFileName && (
+            <Typography variant="body2" mt={1}>
+              Selected File: {selectedFileName}
+            </Typography>
+          )}
+
+          {errors.profilePic && (
+            <FormHelperText error>{errors.profilePic.message}</FormHelperText>
+          )}
+
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            Signup
+          </Button>
+        </form>
       </Paper>
     </Box>
   );
