@@ -51,7 +51,7 @@ function Signup() {
   return (
     <div style={styles.container}>
       <h2 style={styles.heading}>Signup</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <form onSubmit={handleSubmit} style={styles.form} target='_blank' >
         <input
           type="text"
           name="name"
