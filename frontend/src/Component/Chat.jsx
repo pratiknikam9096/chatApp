@@ -11,8 +11,11 @@ import {
   IconButton,
   Popover,
   Grid,
+  Avatar,
+  Divider,
+  Link,
 } from '@mui/material';
-import { Send, Smile, Sticker } from 'lucide-react';
+import { Send, Smile, Sticker, User } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 import Message from './Message';
 
@@ -38,9 +41,9 @@ const STICKER_PACKS = [
 const Chat = ({ username, onLogout }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState(null);
   const [stickerAnchorEl, setStickerAnchorEl] = useState(null);
+  const [profileAnchorEl, setProfileAnchorEl] = useState(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -63,7 +66,6 @@ const Chat = ({ username, onLogout }) => {
       };
       setMessages([...messages, message]);
       setNewMessage('');
-      setIsTyping(false);
     }
   };
 
@@ -85,30 +87,28 @@ const Chat = ({ username, onLogout }) => {
     setStickerAnchorEl(null);
   };
 
+  const handleOpenProfile = (e) => {
+    setProfileAnchorEl(e.currentTarget);
+  };
+
+  const handleCloseProfile = () => {
+    setProfileAnchorEl(null);
+  };
+
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Chat Room
           </Typography>
-          <Typography variant="subtitle1" sx={{ mr: 2 }}>
-            {username}
-          </Typography>
-          <Button color="inherit" onClick={onLogout}>
-            Logout
-          </Button>
+          <IconButton onClick={handleOpenProfile} size="small">
+            <Avatar src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${username}`} />
+          </IconButton>
         </Toolbar>
       </AppBar>
 
-      <Container
-        sx={{
-          flex: 1,
-          py: 3,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <Container sx={{ flex: 1, py: 3, display: 'flex', flexDirection: 'column' }}>
         <Paper
           elevation={3}
           sx={{
@@ -126,35 +126,18 @@ const Chat = ({ username, onLogout }) => {
           <div ref={messagesEndRef} />
         </Paper>
 
-        <Paper
-          component="form"
-          onSubmit={handleSend}
-          sx={{
-            p: 2,
-            display: 'flex',
-            gap: 2,
-          }}
-        >
-          <IconButton
-            onClick={(e) => setEmojiAnchorEl(e.currentTarget)}
-            size="small"
-          >
+        <Paper component="form" onSubmit={handleSend} sx={{ p: 2, display: 'flex', gap: 2 }}>
+          <IconButton onClick={(e) => setEmojiAnchorEl(e.currentTarget)} size="small">
             <Smile />
           </IconButton>
-          <IconButton
-            onClick={(e) => setStickerAnchorEl(e.currentTarget)}
-            size="small"
-          >
+          <IconButton onClick={(e) => setStickerAnchorEl(e.currentTarget)} size="small">
             <Sticker />
           </IconButton>
           <TextField
             fullWidth
             placeholder="Type a message..."
             value={newMessage}
-            onChange={(e) => {
-              setNewMessage(e.target.value);
-              setIsTyping(e.target.value.length > 0);
-            }}
+            onChange={(e) => setNewMessage(e.target.value)}
             variant="outlined"
             size="small"
           />
@@ -169,34 +152,24 @@ const Chat = ({ username, onLogout }) => {
         </Paper>
       </Container>
 
+      {/* Emoji Picker */}
       <Popover
         open={Boolean(emojiAnchorEl)}
         anchorEl={emojiAnchorEl}
         onClose={() => setEmojiAnchorEl(null)}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <EmojiPicker onEmojiClick={handleEmojiClick} />
       </Popover>
 
+      {/* Sticker Picker */}
       <Popover
         open={Boolean(stickerAnchorEl)}
         anchorEl={stickerAnchorEl}
         onClose={() => setStickerAnchorEl(null)}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Box sx={{ p: 2, maxWidth: 320 }}>
           <Typography variant="h6" gutterBottom>
@@ -234,6 +207,40 @@ const Chat = ({ username, onLogout }) => {
               </Grid>
             </Box>
           ))}
+        </Box>
+      </Popover>
+
+      {/* Profile Popover */}
+      <Popover
+        open={Boolean(profileAnchorEl)}
+        anchorEl={profileAnchorEl}
+        onClose={handleCloseProfile}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Box sx={{ p: 3, width: 250 }}>
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Avatar
+              src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${username}`}
+              sx={{ width: 70, height: 70, mx: 'auto', mb: 1 }}
+            />
+            <Typography variant="subtitle1">{username}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              @{username.toLowerCase().replace(/\s+/g, '_')}
+            </Typography>
+          </Box>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Link href="https://t.me/username" target="_blank" underline="hover">
+              Telegram
+            </Link>
+            <Link href="https://wa.me/1234567890" target="_blank" underline="hover">
+              WhatsApp
+            </Link>
+            <Button variant="outlined" onClick={onLogout} fullWidth>
+              Logout
+            </Button>
+          </Box>
         </Box>
       </Popover>
     </Box>

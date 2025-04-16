@@ -1,11 +1,11 @@
 import "./App.css";
 import React, { useState } from 'react';
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Join from "./Component/Have";
-import Chat from "./Component/Chat";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import Join from "./Component/Have"; // login page
+import Chat from "./Component/Chat"; // chat component
 import HomePage from "./pages/HomePage";
 import ChatPage from "./pages/ChatPage";
-import { CssBaseline, ThemeProvider, createTheme, Button } from '@mui/material';
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 
 const theme = createTheme({
   palette: {
@@ -29,30 +29,32 @@ function App() {
     setUsername('');
   };
 
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <HomePage />,
-    },
-    {
-      path: "/chats",
-      element: <ChatPage />,
-    },
-    {
-      path: "*",
-      element: <h1>Error: Page Not Found</h1>,
-    },
-  ]);
-
   return (
     <ThemeProvider theme={theme}>
-        <CssBaseline />
-      {username ? (
-        <Chat username={username} onLogout={handleLogout} />
-      ) : (
-        <Join onJoin={handleJoin} />
-      )}
-      <RouterProvider router={router} />
+      <CssBaseline />
+      <Router>
+        <Routes>
+          {/* Homepage Route */}
+          <Route path="/" element={<HomePage />} />
+
+          {/* Login Route */}
+          <Route path="/login" element={
+            username
+              ? <Navigate to="/chat" replace />
+              : <Join onJoin={handleJoin} />
+          } />
+
+          {/* Protected Chat Route */}
+          <Route path="/chat" element={
+            username
+              ? <Chat username={username} onLogout={handleLogout} />
+              : <Navigate to="/login" replace />
+          } />
+
+          {/* 404 Page */}
+          <Route path="*" element={<h1>Error: Page Not Found</h1>} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }
