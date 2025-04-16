@@ -1,9 +1,34 @@
 import "./App.css";
-import { Button } from "@mui/material";
+import React, { useState } from 'react';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import HomePage from "./pages/homePage";
-import ChatPage from "./pages/chatPage";
+import Join from "./Component/Have";
+import Chat from "./Component/Chat";
+import HomePage from "./pages/HomePage";
+import ChatPage from "./pages/ChatPage";
+import { CssBaseline, ThemeProvider, createTheme, Button } from '@mui/material';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    background: {
+      default: '#f5f5f5',
+    },
+  },
+});
+
 function App() {
+  const [username, setUsername] = useState('');
+
+  const handleJoin = (name) => {
+    setUsername(name);
+  };
+
+  const handleLogout = () => {
+    setUsername('');
+  };
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -14,16 +39,21 @@ function App() {
       element: <ChatPage />,
     },
     {
-      path:"*",
-      element:<h1>error</h1>
-    }
+      path: "*",
+      element: <h1>Error: Page Not Found</h1>,
+    },
   ]);
+
   return (
-    <>
-      <RouterProvider router={router}>
-        <Button variant="contained">Contained</Button>
-      </RouterProvider>
-    </>
+    <ThemeProvider theme={theme}>
+        <CssBaseline />
+      {username ? (
+        <Chat username={username} onLogout={handleLogout} />
+      ) : (
+        <Join onJoin={handleJoin} />
+      )}
+      <RouterProvider router={router} />
+    </ThemeProvider>
   );
 }
 
